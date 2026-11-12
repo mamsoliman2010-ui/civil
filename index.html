@@ -764,3 +764,236 @@
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 text-sm">
                                     ${generateRowsHTML(deptTasks)}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+            });
+
+            updateKPIs(filtered);
+        }
+
+        function renderTable() {
+            renderAll();
+        }
+
+        function filterDataByPeriod() {
+            renderAll();
+            showToast('تم تحديث البيانات حسب الفترة الزمنية المختارة', 'info');
+        }
+
+        // تحديث البطاقات الرقمية ديناميكياً
+        function updateKPIs(list) {
+            const calcAvg = (dept) => {
+                const items = list.filter(i => i.dept === dept);
+                if (!items.length) return 0;
+                const sum = items.reduce((acc, curr) => acc + Number(curr.progress), 0);
+                return (sum / items.length).toFixed(1);
+            };
+
+            const netAvg = calcAvg('networks');
+            const mechAvg = calcAvg('mechanical');
+            const finAvg = calcAvg('financial');
+            const delayedCount = list.filter(i => i.status === 'delayed').length;
+
+            if(netAvg > 0) document.getElementById('kpi-networks').innerText = netAvg + '%';
+            if(mechAvg > 0) document.getElementById('kpi-mechanical').innerText = mechAvg + '%';
+            if(finAvg > 0) document.getElementById('kpi-financial').innerText = finAvg + '%';
+            document.getElementById('kpi-alerts').innerText = delayedCount;
+        }
+
+        // إدارة النافذة المنبثقة (إضافة / تعديل)
+        function openAddModal(defaultDept = 'networks') {
+            document.getElementById('task-form').reset();
+            document.getElementById('task-id').value = '';
+            document.getElementById('task-dept').value = defaultDept;
+            document.getElementById('modal-title').innerText = 'إضافة بيان متابعة جديد';
+            document.getElementById('task-modal').classList.remove('hidden');
+        }
+
+        function editTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (!task) return;
+
+            document.getElementById('task-id').value = task.id;
+            document.getElementById('task-dept').value = task.dept;
+            document.getElementById('task-period').value = task.period;
+            document.getElementById('task-title').value = task.title;
+            document.getElementById('task-region').value = task.region;
+            document.getElementById('task-engineer').value = task.engineer;
+            document.getElementById('task-progress').value = task.progress;
+            document.getElementById('task-status').value = task.status;
+
+            document.getElementById('modal-title').innerText = 'تعديل بيانات المتابعة';
+            document.getElementById('task-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('task-modal').classList.add('hidden');
+        }
+
+        function saveTask(e) {
+            e.preventDefault();
+            const id = document.getElementById('task-id').value;
+            const progressVal = Number(document.getElementById('task-progress').value);
+            let statusVal = document.getElementById('task-status').value;
+
+            // ضبط الحالة تلقائياً إذا كانت النسبة 100%
+            if (progressVal === 100) statusVal = 'completed';
+
+            const taskObj = {
+                id: id ? Number(id) : Date.now(),
+                dept: document.getElementById('task-dept').value,
+                period: document.getElementById('task-period').value,
+                title: document.getElementById('task-title').value,
+                region: document.getElementById('task-region').value,
+                engineer: document.getElementById('task-engineer').value,
+                progress: progressVal,
+                status: statusVal
+            };
+
+            if (id) {
+                const index = tasks.findIndex(t => t.id === Number(id));
+                tasks[index] = taskObj;
+                showToast('تم تعديل البيان بنجاح', 'success');
+            } else {
+                tasks.unshift(taskObj);
+                showToast('تمت إضافة البيان الجديد إلى سجل المتابعة', 'success');
+            }
+
+            syncStorage();
+            closeModal();
+            renderAll();
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            syncStorage();
+            renderAll();
+            showToast('تم حذف السجل بنجاح', 'warning');
+        }
+
+        // تصدير البيانات إلى ملف CSV يفتح ببرنامج Excel
+        function exportToCSV() {
+            let csvContent = "\uFEFF"; // لدعم اللغة العربية في Excel
+            csvContent += "القسم,اسم العملية,المنطقة الهندسية,المهندس المسئول,نسبة التنفيذ,الحالة\n";
+
+            const deptNames = { networks: 'إدارة الشبكات', mechanical: 'الصيانة الميكانيكية', financial: 'الشئون المالية' };
+            const statusNames = { completed: 'مكتمل', 'in-progress': 'جاري التنفيذ', delayed: 'متأخر' };
+
+            tasks.forEach(t => {
+                const row = [
+                    deptNames[t.dept],
+                    `"${t.title}"`,
+                    `"${t.region}"`,
+                    `"${t.engineer}"`,
+                    `${t.progress}%`,
+                    statusNames[t.status]
+                ].join(",");
+                csvContent += row + "\n";
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "تقرير_متابعة_صرف_شمال_الجيزة.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast('تم تصدير ملف الإكسل بنجاح', 'success');
+        }
+
+        // نظام التنبيهات المرئية (Toast)
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const colors = {
+                success: 'bg-emerald-600 text-white',
+                info: 'bg-primary text-white',
+                warning: 'bg-amber-600 text-white'
+            };
+            const icons = {
+                success: 'fa-circle-check',
+                info: 'fa-circle-info',
+                warning: 'fa-triangle-exclamation'
+            };
+
+            const toast = document.createElement('div');
+            toast.className = `${colors[type]} px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 text-sm font-medium transform transition-all duration-300 translate-y-2 opacity-0`;
+            toast.innerHTML = `<i class="fa-solid ${icons[type]}"></i><span>${message}</span>`;
+            
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // تهيئة الرسوم البيانية (Chart.js)
+        function initCharts() {
+            Chart.defaults.font.family = 'Tajawal';
+            
+            // 1. الرسم البياني الشريطي للمناطق الهندسية
+            const ctxBar = document.getElementById('barChart').getContext('2d');
+            barChartInstance = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: ['هندسة أوسيم', 'هندسة الوراق', 'هندسة الهرم', 'هندسة كرداسة', 'هندسة البراجيل'],
+                    datasets: [
+                        {
+                            label: 'المستهدف (كم)',
+                            data: [45, 38, 42, 30, 35],
+                            backgroundColor: '#cbd5e1',
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'المنفذ فعلياً (كم)',
+                            data: [41, 35, 36, 22, 33],
+                            backgroundColor: '#0f4c81',
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // 2. الرسم البياني الدائري للموازنة
+            const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
+            doughnutChartInstance = new Chart(ctxDoughnut, {
+                type: 'doughnut',
+                data: {
+                    labels: ['تطهيرات المصارف', 'صيانة المحطات', 'إحلال الصرف المغطى', 'مصروفات إدارية'],
+                    datasets: [{
+                        data: [45, 25, 20, 10],
+                        backgroundColor: ['#008080', '#f59e0b', '#0f4c81', '#8b5cf6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '68%',
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
