@@ -1,357 +1,766 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="scroll-smooth">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>م. محمود سليمان | استشاري تصميم منشآت ري وصرف</title>
-    <!-- Tailwind CSS CDN -->
+    <title>منظومة متابعة الإدارة العامة لصرف شمال الجيزة</title>
+    
+    <!-- استدعاء خط تجوال العربي الاحترافي -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- مكتبة Tailwind CSS للتصميم المتجاوب -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
+    
+    <!-- مكتبة الأيقونات FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts - Cairo -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- مكتبة الرسوم البيانية Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        cairo: ['Cairo', 'sans-serif'],
+                        sans: ['Tajawal', 'sans-serif'],
                     },
                     colors: {
-                        primary: '#0284c7', // Sky blue for water/irrigation theme
-                        secondary: '#0f172a',
-                        accent: '#0ea5e9'
+                        primary: '#0f4c81', // أزرق وزارة الري والموارد المائية
+                        secondary: '#008080', // أخضر مائي
+                        accent: '#f59e0b',
+                        dark: '#1e293b'
                     }
                 }
             }
         }
     </script>
+
     <style>
         body {
-            font-family: 'Cairo', sans-serif;
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f1f5f9;
         }
-        .water-gradient {
-            background: linear-gradient(135deg, #0f172a 0%, #0369a1 50%, #0284c7 100%);
+        /* تخصيص شريط التمرير */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        /* تأثيرات الطباعة للتقارير */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            body {
+                background-color: white;
+            }
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased selection:bg-cyan-500 selection:text-white">
+<body class="text-slate-800 antialiased">
 
-    <!-- Header / Navbar -->
-    <header class="fixed top-0 left-0 right-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 text-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <a href="#" class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-md shadow-cyan-500/20">
-                    <i class="fa-solid fa-water text-white text-xl"></i>
-                </div>
-                <div>
-                    <span class="text-lg font-bold tracking-tight block">م. محمود سليمان</span>
-                    <span class="text-xs text-cyan-400 font-medium">استشاري منشآت الري والصرف</span>
-                </div>
-            </a>
-            
-            <nav class="hidden md:flex items-center gap-8 font-medium">
-                <a href="#about" class="hover:text-cyan-400 transition-colors">عن المهندس</a>
-                <a href="#experience" class="hover:text-cyan-400 transition-colors">الخبرات والوظائف</a>
-                <a href="#expertise" class="hover:text-cyan-400 transition-colors">التخصصات الهندسية</a>
-                <a href="#contact" class="hover:text-cyan-400 transition-colors">تواصل معي</a>
-            </nav>
+    <!-- حاوية الإشعارات (Toast Notification) بدلاً من alert -->
+    <div id="toast-container" class="fixed bottom-5 left-5 z-50 flex flex-col gap-2 no-print"></div>
 
-            <div class="flex items-center gap-4">
-                <a href="#contact" class="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold text-sm shadow-md shadow-cyan-500/20 hover:opacity-95 transition-all">
-                    <i class="fa-solid fa-paper-plane"></i> اتصل بي
-                </a>
-                <button id="menu-btn" class="md:hidden text-2xl text-slate-300 hover:text-white focus:outline-none">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-slate-900 border-b border-slate-800 px-4 pt-2 pb-6 space-y-3">
-            <a href="#about" class="block py-2 text-slate-300 hover:text-cyan-400 border-b border-slate-800/50">عن المهندس</a>
-            <a href="#experience" class="block py-2 text-slate-300 hover:text-cyan-400 border-b border-slate-800/50">الخبرات والوظائف</a>
-            <a href="#expertise" class="block py-2 text-slate-300 hover:text-cyan-400 border-b border-slate-800/50">التخصصات الهندسية</a>
-            <a href="#contact" class="block py-2 text-slate-300 hover:text-cyan-400">تواصل معي</a>
-        </div>
-    </header>
-
-    <!-- Hero Section -->
-    <section class="relative min-h-screen water-gradient text-white flex items-center pt-20 overflow-hidden">
-        <!-- Decorative elements -->
-        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px]"></div>
+    <!-- الهيكل الرئيسي للتطبيق -->
+    <div class="min-h-screen flex flex-col md:flex-row">
         
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div class="lg:col-span-7 space-y-6 text-center lg:text-right">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-sm font-semibold backdrop-blur-sm">
-                    <i class="fa-solid fa-award"></i> استشاري هندسي معتمد
-                </div>
-                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight">
-                    م. محمود سليمان
-                </h1>
-                <p class="text-xl sm:text-2xl text-cyan-200 font-semibold">
-                    مدير عام صرف شمال الجيزة
-                </p>
-                <p class="text-slate-300 text-lg leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                    خبرة طويلة وواسعة في تخطيط، تصميم، وإدارة مشروعات منشآت الري والصرف وتطوير شبكات المياه بكفاءة عالية وفق أحدث المعايير الهندسية والإدارية.
-                </p>
-                <div class="flex flex-wrap justify-center lg:justify-start gap-4 pt-4">
-                    <a href="#contact" class="px-8 py-4 rounded-xl bg-cyan-500 text-slate-950 font-bold shadow-lg shadow-cyan-500/30 hover:bg-cyan-400 transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-envelope"></i> احصل على استشارة
-                    </a>
-                    <a href="#experience" class="px-8 py-4 rounded-xl bg-slate-800/80 border border-slate-700 text-white font-bold hover:bg-slate-800 transition-all flex items-center gap-2 backdrop-blur-md">
-                        <i class="fa-solid fa-briefcase"></i> السيرة المهنية
-                    </a>
-                </div>
-            </div>
-
-            <!-- Profile Graphic Card -->
-            <div class="lg:col-span-5 flex justify-center">
-                <div class="relative w-full max-w-md">
-                    <div class="absolute -inset-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-3xl blur-xl opacity-50"></div>
-                    <div class="relative bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center shadow-2xl">
-                        <div class="w-32 h-32 mx-auto mb-6 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white text-5xl shadow-xl shadow-cyan-500/20">
-                            <i class="fa-solid fa-user-tie"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold text-white mb-1">م. محمود سليمان</h3>
-                        <p class="text-cyan-400 text-sm mb-6 font-medium">مدير عام صرف شمال الجيزة</p>
-                        
-                        <div class="grid grid-cols-2 gap-4 border-t border-slate-800 pt-6 text-right">
-                            <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-800">
-                                <span class="block text-2xl font-bold text-cyan-400">+25</span>
-                                <span class="text-xs text-slate-400">سنة خبرة هندسية</span>
-                            </div>
-                            <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-800">
-                                <span class="block text-2xl font-bold text-cyan-400">إدارة</span>
-                                <span class="text-xs text-slate-400">منظومات الصرف الكبرى</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="py-24 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <span class="text-cyan-600 font-bold text-sm tracking-wider uppercase bg-cyan-50 px-3 py-1 rounded-full border border-cyan-100">نبذة تعريفية</span>
-                <h2 class="text-3xl sm:text-4xl font-black text-slate-900 mt-3">خبرة رائدة في قطاع المياه والري والصرف</h2>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm hover:shadow-md transition-all group">
-                    <div class="w-14 h-14 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center text-2xl mb-6 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
-                        <i class="fa-solid fa-drafting-compass"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-3">التصميم الهندسي الاستشاري</h3>
-                    <p class="text-slate-600 leading-relaxed text-sm">
-                        تصميم وتطوير منشآت الري والصرف المختلفة مثل (محطات الرفع، السحارات، البدالات، وهدارات المياه) بأعلى معايير الجودة والكفاءة الهندسية.
-                    </p>
-                </div>
-
-                <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm hover:shadow-md transition-all group">
-                    <div class="w-14 h-14 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center text-2xl mb-6 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
-                        <i class="fa-solid fa-building-shield"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-3">القيادة والإدارة الإستراتيجية</h3>
-                    <p class="text-slate-600 leading-relaxed text-sm">
-                        إدارة شاملة كمدير عام صرف شمال الجيزة، وتوجيه الفرق الهندسية والفنية لتنفيذ وصيانة شبكات الصرف ومشروعات البنية التحتية بكفاءة عالية.
-                    </p>
-                </div>
-
-                <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm hover:shadow-md transition-all group">
-                    <div class="w-14 h-14 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center text-2xl mb-6 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
-                        <i class="fa-solid fa-chart-line"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-3">التطوير وإدارة الأزمات</h3>
-                    <p class="text-slate-600 leading-relaxed text-sm">
-                        وضع الخطط المستقبلية لمواجهة التغيرات المائية وإدارة الأزمات والطوارئ المتعلقة بقطاع الصرف الزراعي والعام بكفاءة واحترافية تامة.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Experience & Positions Section -->
-    <section id="experience" class="py-24 bg-slate-100 border-y border-slate-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <span class="text-cyan-600 font-bold text-sm tracking-wider uppercase bg-cyan-50 px-3 py-1 rounded-full border border-cyan-100">السيرة المهنية</span>
-                <h2 class="text-3xl sm:text-4xl font-black text-slate-900 mt-3">المناصب القيادية والخبرات العملية</h2>
-            </div>
-
-            <div class="max-w-4xl mx-auto space-y-6">
-                <!-- Position 1 -->
-                <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-6 items-start">
-                    <div class="w-16 h-16 rounded-2xl bg-cyan-600 text-white flex items-center justify-center text-2xl shrink-0">
-                        <i class="fa-solid fa-crown"></i>
-                    </div>
-                    <div class="space-y-2 flex-1">
-                        <div class="flex flex-wrap justify-between items-center gap-2">
-                            <h3 class="text-2xl font-bold text-slate-900">مدير عام صرف شمال الجيزة</h3>
-                            <span class="px-3 py-1 rounded-full bg-cyan-100 text-cyan-800 text-xs font-bold">الحالي</span>
-                        </div>
-                        <p class="text-slate-600 font-medium">قطاع الموارد المائية والري - وزارة الموارد المائية والري</p>
-                        <p class="text-slate-500 text-sm leading-relaxed pt-2">
-                            إدارة وقيادة منظومة صرف شمال الجيزة بالكامل، الإشراف على صيانة وتطهير المصارف، متابعة تنفيذ المشروعات الإنشائية الجديدة ومحطات الرفع، وضمان تصريف المياه بفعالية لحماية الأراضي الزراعية والمنشآت.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Position 2 -->
-                <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-6 items-start">
-                    <div class="w-16 h-16 rounded-2xl bg-slate-800 text-white flex items-center justify-center text-2xl shrink-0">
-                        <i class="fa-solid fa-pen-ruler"></i>
-                    </div>
-                    <div class="space-y-2 flex-1">
-                        <div class="flex flex-wrap justify-between items-center gap-2">
-                            <h3 class="text-2xl font-bold text-slate-900">استشاري تصميم منشآت ري وصرف</h3>
-                            <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">خبرة استشارية</span>
-                        </div>
-                        <p class="text-slate-600 font-medium">مكتب استشاري هندسي وتصميمات الموارد المائية</p>
-                        <p class="text-slate-500 text-sm leading-relaxed pt-2">
-                            إعداد المراجعات الهندسية، التصميمات الإنشائية والهيدروليكية لمنشآت الري والصرف الكبرى، وتقديم الاستشارات الفنية والتقييمات الهندسية للمشروعات القومية.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Expertise Section -->
-    <section id="expertise" class="py-24 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <span class="text-cyan-600 font-bold text-sm tracking-wider uppercase bg-cyan-50 px-3 py-1 rounded-full border border-cyan-100">المجالات والمهارات</span>
-                <h2 class="text-3xl sm:text-4xl font-black text-slate-900 mt-3">التخصصات الهندسية والإدارية</h2>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="p-6 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-3">
-                    <div class="w-12 h-12 mx-auto rounded-lg bg-cyan-500/10 text-cyan-600 flex items-center justify-center text-xl">
+        <!-- القائمة الجانبية (Sidebar) -->
+        <aside id="sidebar" class="bg-primary text-white w-full md:w-72 flex-shrink-0 transition-all duration-300 z-30 no-print shadow-xl">
+            <div class="p-6 border-b border-blue-800/60 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-2xl text-cyan-300 shadow-inner">
                         <i class="fa-solid fa-water"></i>
                     </div>
-                    <h4 class="font-bold text-slate-900 text-lg">التصميم الهيدروليكي</h4>
-                    <p class="text-slate-600 text-xs">تصميم القطاعات المائية وحسابات التصرفات المائية للمصارف والترع.</p>
-                </div>
-
-                <div class="p-6 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-3">
-                    <div class="w-12 h-12 mx-auto rounded-lg bg-cyan-500/10 text-cyan-600 flex items-center justify-center text-xl">
-                        <i class="fa-solid fa-industry"></i>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight">صرف شمال الجيزة</h1>
+                        <p class="text-xs text-blue-200 mt-0.5">الهيئة المصرية العامة لمشروعات الصرف</p>
                     </div>
-                    <h4 class="font-bold text-slate-900 text-lg">محطات الرفع</h4>
-                    <p class="text-slate-600 text-xs">دراسة وتصميم وإدارة محطات رفع مياه الصرف بكفاءة تشغيل عالية.</p>
                 </div>
-
-                <div class="p-6 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-3">
-                    <div class="w-12 h-12 mx-auto rounded-lg bg-cyan-500/10 text-cyan-600 flex items-center justify-center text-xl">
-                        <i class="fa-solid fa-tasks"></i>
-                    </div>
-                    <h4 class="font-bold text-slate-900 text-lg">الإدارة الهندسية</h4>
-                    <p class="text-slate-600 text-xs">إدارة المشروعات، إعداد المقايسات، ومراقبة الجداول الزمنية للتنفيذ.</p>
-                </div>
-
-                <div class="p-6 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-3">
-                    <div class="w-12 h-12 mx-auto rounded-lg bg-cyan-500/10 text-cyan-600 flex items-center justify-center text-xl">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-                    <h4 class="font-bold text-slate-900 text-lg">صيانة وشبكات الصرف</h4>
-                    <p class="text-slate-600 text-xs">إدارة خطط الصيانة الدورية وشبكات الصرف المغطى والعام.</p>
-                </div>
+                <button id="mobile-menu-btn" class="md:hidden text-white p-2 rounded-lg hover:bg-white/10">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
             </div>
-        </div>
-    </section>
 
-    <!-- Contact Section -->
-    <section id="contact" class="py-24 bg-slate-900 text-white relative">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-6">
-                    <span class="text-cyan-400 font-bold text-sm tracking-wider uppercase bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">تواصل مباشر</span>
-                    <h2 class="text-3xl sm:text-4xl font-black tracking-tight">نلتقي لخدمة العمل الهندسي والتطوير المستدام</h2>
-                    <p class="text-slate-300 leading-relaxed">
-                        يسعدني التواصل الدائم مع الزملاء المهندسين، والجهات البحثية، والمهتمين بقطاع الري والصرف ومنشآت المياه. يمكنك مراسلتي عبر وسائل الاتصال المتاحة.
-                    </p>
+            <!-- روابط الأقسام -->
+            <nav id="nav-links" class="hidden md:block p-4 space-y-2">
+                <p class="text-xs font-semibold text-blue-300 uppercase tracking-wider px-3 mb-2">القائمة الرئيسية</p>
+                
+                <button onclick="switchTab('dashboard')" data-tab="dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-right font-medium transition-all bg-white/15 text-white shadow-sm">
+                    <i class="fa-solid fa-chart-pie w-5 text-center text-cyan-300"></i>
+                    <span>لوحة القيادة العامة</span>
+                </button>
 
-                    <div class="space-y-4 pt-4">
-                        <div class="flex items-center gap-4 bg-slate-800/60 p-4 rounded-xl border border-slate-800">
-                            <div class="w-12 h-12 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl">
-                                <i class="fa-solid fa-location-dot"></i>
+                <p class="text-xs font-semibold text-blue-300 uppercase tracking-wider px-3 pt-4 mb-2">أقسام الإدارة</p>
+
+                <button onclick="switchTab('networks')" data-tab="networks" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-right font-medium text-blue-100 hover:bg-white/10 transition-all">
+                    <i class="fa-solid fa-diagram-project w-5 text-center text-emerald-300"></i>
+                    <span>إدارة الشبكات والتطهيرات</span>
+                </button>
+
+                <button onclick="switchTab('mechanical')" data-tab="mechanical" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-right font-medium text-blue-100 hover:bg-white/10 transition-all">
+                    <i class="fa-solid fa-gears w-5 text-center text-amber-300"></i>
+                    <span>الصيانة الميكانيكية والمحطات</span>
+                </button>
+
+                <button onclick="switchTab('financial')" data-tab="financial" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-right font-medium text-blue-100 hover:bg-white/10 transition-all">
+                    <i class="fa-solid fa-file-invoice-dollar w-5 text-center text-purple-300"></i>
+                    <span>الشئون المالية والإدارية</span>
+                </button>
+
+                <p class="text-xs font-semibold text-blue-300 uppercase tracking-wider px-3 pt-4 mb-2">أدوات النظام</p>
+
+                <button onclick="openAddModal()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-right font-medium bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-md mt-2">
+                    <i class="fa-solid fa-plus-circle w-5 text-center"></i>
+                    <span>إضافة بيان / مهمة جديدة</span>
+                </button>
+            </nav>
+
+            <!-- معلومات التحديث أسفل القائمة -->
+            <div class="hidden md:block p-4 mt-auto border-t border-blue-800/60 text-xs text-blue-200">
+                <div class="flex items-center justify-between mb-1">
+                    <span>حالة النظام:</span>
+                    <span class="flex items-center gap-1 text-emerald-300 font-bold">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> متصل
+                    </span>
+                </div>
+                <p id="last-updated-time">آخر تحديث: اليوم</p>
+            </div>
+        </aside>
+
+        <!-- المحتوى الرئيسي (Main Content) -->
+        <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            
+            <!-- الشريط العلوي (Top Header) -->
+            <header class="bg-white border-b border-slate-200 px-6 py-4 flex flex-wrap items-center justify-between gap-4 no-print shadow-sm">
+                <div>
+                    <h2 id="page-title" class="text-xl md:text-2xl font-bold text-slate-800">لوحة القيادة ومؤشرات الأداء</h2>
+                    <p id="page-subtitle" class="text-sm text-slate-500">متابعة الموقف التنفيذي لأعمال الصرف المغطى والمكشوف بشمال الجيزة</p>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <!-- فلتر الفترة الزمنية -->
+                    <select id="period-filter" onchange="filterDataByPeriod()" class="bg-slate-50 border border-slate-300 text-slate-700 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="all">العام المالي 2026 / 2027 (الكل)</option>
+                        <option value="Q1">الربع الأول (يوليو - سبتمبر)</option>
+                        <option value="Q2">الربع الثاني (أكتوبر - ديسمبر)</option>
+                        <option value="Q3">الربع الثالث (يناير - مارس)</option>
+                    </select>
+
+                    <!-- زر تصدير CSV / Excel -->
+                    <button onclick="exportToCSV()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 transition-colors border border-slate-300" title="تصدير البيانات لملف إكسل">
+                        <i class="fa-solid fa-file-excel text-emerald-600"></i>
+                        <span class="hidden sm:inline">تصدير Excel</span>
+                    </button>
+
+                    <!-- زر الطباعة -->
+                    <button onclick="window.print()" class="bg-primary hover:bg-blue-800 text-white px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 transition-colors shadow-sm">
+                        <i class="fa-solid fa-print"></i>
+                        <span class="hidden sm:inline">طباعة التقرير</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- ترويسة الطباعة (تظهر فقط عند الطباعة) -->
+            <div class="hidden print-only p-6 border-b-2 border-slate-800 mb-4 text-center">
+                <h1 class="text-2xl font-bold">وزارة الموارد المائية والري - الهيئة المصرية العامة لمشروعات الصرف</h1>
+                <h2 class="text-xl font-semibold mt-1">الإدارة العامة لصرف شمال الجيزة - تقرير المتابعة الدوري</h2>
+                <p class="text-sm text-slate-600 mt-1" id="print-date"></p>
+            </div>
+
+            <!-- منطقة عرض الأقسام (Dynamic Views) -->
+            <div class="p-6 flex-1 overflow-y-auto space-y-6">
+
+                <!-- 1. قسم لوحة القيادة العامة (Dashboard View) -->
+                <section id="view-dashboard" class="space-y-6">
+                    <!-- بطاقات المؤشرات الرئيسية (KPI Cards) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                        <!-- بطاقة 1 -->
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-500">نسبة إنجاز التطهيرات</p>
+                                    <h3 id="kpi-networks" class="text-3xl font-extrabold text-slate-800 mt-2">84.5%</h3>
+                                </div>
+                                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                                    <i class="fa-solid fa-water-ladder"></i>
+                                </div>
                             </div>
-                            <div>
-                                <h5 class="text-xs text-slate-400 font-medium">المقر الإداري</h5>
-                                <p class="text-white font-semibold">شمال الجيزة، جمهورية مصر العربية</p>
+                            <div class="mt-4 flex items-center text-xs">
+                                <span class="text-emerald-600 font-bold flex items-center gap-1">
+                                    <i class="fa-solid fa-arrow-trend-up"></i> +4.2%
+                                </span>
+                                <span class="text-slate-400 mr-2">عن المستهدف الشهري</span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
+                                <div class="bg-emerald-500 h-full rounded-full" style="width: 84.5%"></div>
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-4 bg-slate-800/60 p-4 rounded-xl border border-slate-800">
-                            <div class="w-12 h-12 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl">
-                                <i class="fa-solid fa-envelope"></i>
+                        <!-- بطاقة 2 -->
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-500">جاهزية محطات الرفع</p>
+                                    <h3 id="kpi-mechanical" class="text-3xl font-extrabold text-slate-800 mt-2">92.0%</h3>
+                                </div>
+                                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                                    <i class="fa-solid fa-gears"></i>
+                                </div>
                             </div>
-                            <div>
-                                <h5 class="text-xs text-slate-400 font-medium">البريد الإلكتروني</h5>
-                                <p class="text-white font-semibold">eng.mahmoud.soliman@example.com</p>
+                            <div class="mt-4 flex items-center text-xs">
+                                <span class="text-emerald-600 font-bold">23 من 25 وحدة</span>
+                                <span class="text-slate-400 mr-2">تعمل بكفاءة كاملة</span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
+                                <div class="bg-amber-500 h-full rounded-full" style="width: 92%"></div>
+                            </div>
+                        </div>
+
+                        <!-- بطاقة 3 -->
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-500">الموقف المالي والمستخلصات</p>
+                                    <h3 id="kpi-financial" class="text-3xl font-extrabold text-slate-800 mt-2">78.4%</h3>
+                                </div>
+                                <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
+                                    <i class="fa-solid fa-coins"></i>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-center text-xs">
+                                <span class="text-purple-600 font-bold">14.2 مليون ج.م</span>
+                                <span class="text-slate-400 mr-2">من إجمالي 18.1 مليون</span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
+                                <div class="bg-purple-500 h-full rounded-full" style="width: 78.4%"></div>
+                            </div>
+                        </div>
+
+                        <!-- بطاقة 4 -->
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-500">البلاغات والأعطال الطارئة</p>
+                                    <h3 id="kpi-alerts" class="text-3xl font-extrabold text-slate-800 mt-2">3</h3>
+                                </div>
+                                <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-center text-xs">
+                                <span class="text-rose-600 font-bold">2 قيد الإصلاح</span>
+                                <span class="text-slate-400 mr-2">و 1 بانتظار قطع الغيار</span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
+                                <div class="bg-rose-500 h-full rounded-full" style="width: 25%"></div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Contact Form Card -->
-                <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-2xl">
-                    <h3 class="text-2xl font-bold mb-6 text-white">أرسل رسالة أو استفسار</h3>
-                    <form onsubmit="handleFormSubmit(event)" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-300 mb-1">الاسم الكريم</label>
-                            <input type="text" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-colors" placeholder="ادخل اسمك الكامل">
+                    <!-- الرسوم البيانية (Charts Section) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- رسم بياني مقارن للأقسام -->
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-lg text-slate-800">مقارنة المستهدف والمنفذ بالمناطق الهندسية</h3>
+                                <span class="text-xs bg-blue-50 text-primary px-3 py-1 rounded-full font-semibold">وحدة القياس: كم / %</span>
+                            </div>
+                            <div class="relative h-72 w-full">
+                                <canvas id="barChart"></canvas>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-300 mb-1">البريد الإلكتروني</label>
-                            <input type="email" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-colors" placeholder="name@example.com">
+
+                        <!-- رسم بياني دائري لتوزيع الميزانية -->
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                            <h3 class="font-bold text-lg text-slate-800 mb-4">توزيع بنود الصرف والموازنة</h3>
+                            <div class="relative h-64 w-full flex items-center justify-center">
+                                <canvas id="doughnutChart"></canvas>
+                            </div>
+                            <div class="mt-4 text-center text-xs text-slate-500">
+                                إجمالي الاعتمادات المالية للعام الحالي
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-300 mb-1">الرسالة أو الاستشارة</label>
-                            <textarea rows="4" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-colors" placeholder="اكتب تفاصيل استشارتك أو رسالتك..."></textarea>
+                    </div>
+
+                    <!-- جدول أحدث الأنشطة والقرارات -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="p-5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4">
+                            <div>
+                                <h3 class="font-bold text-lg text-slate-800">سجل المتابعة الميدانية الشامل</h3>
+                                <p class="text-xs text-slate-500">عرض كافة الأعمال المسجلة عبر إدارات (الشبكات، الميكانيكا، الشئون المالية)</p>
+                            </div>
+                            <div class="relative w-full sm:w-64 no-print">
+                                <input type="text" id="global-search" onkeyup="renderTable()" placeholder="بحث باسم المنطقة، العملية، المهندس..." class="w-full bg-slate-50 border border-slate-300 rounded-xl pr-10 pl-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                                <i class="fa-solid fa-search absolute right-3.5 top-3 text-slate-400 text-sm"></i>
+                            </div>
                         </div>
-                        <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold shadow-lg shadow-cyan-500/20 hover:opacity-95 transition-all">
-                            إرسال الرسالة الآن
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-600 text-xs uppercase border-b border-slate-200">
+                                        <th class="py-3.5 px-4 font-bold">القسم المختص</th>
+                                        <th class="py-3.5 px-4 font-bold">اسم العملية / البيان</th>
+                                        <th class="py-3.5 px-4 font-bold">المنطقة / الهندسة</th>
+                                        <th class="py-3.5 px-4 font-bold">المهندس المسئول</th>
+                                        <th class="py-3.5 px-4 font-bold">نسبة التنفيذ</th>
+                                        <th class="py-3.5 px-4 font-bold">الحالة</th>
+                                        <th class="py-3.5 px-4 font-bold text-center no-print">إجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tasks-table-body" class="divide-y divide-slate-100 text-sm">
+                                    <!-- يتم تعبئة الصفوف ديناميكياً بواسطة JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. قسم إدارة الشبكات والتطهيرات (Networks View) -->
+                <section id="view-networks" class="hidden space-y-6">
+                    <div class="bg-gradient-to-l from-emerald-800 to-teal-700 rounded-2xl p-6 text-white shadow-md flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h3 class="text-2xl font-bold">إدارة الشبكات وأعمال التطهيرات</h3>
+                            <p class="text-emerald-100 text-sm mt-1">متابعة تطهير المصارف المكشوفة، صيانة مجمعات الصرف المغطى، وتشغيل الحفارات</p>
+                        </div>
+                        <button onclick="openAddModal('networks')" class="bg-white text-emerald-800 hover:bg-emerald-50 px-4 py-2.5 rounded-xl font-bold text-sm shadow transition-colors">
+                            <i class="fa-solid fa-plus ml-1"></i> إضافة عملية تطهير
                         </button>
-                    </form>
-                </div>
+                    </div>
+
+                    <!-- بطاقات المعدات والحفارات -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl">
+                                <i class="fa-solid fa-truck-monster"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-500 font-semibold">الحفارات البرمائية</p>
+                                <h4 class="text-xl font-bold text-slate-800">4 حفارات عاملة</h4>
+                                <p class="text-xs text-emerald-600 mt-0.5">مصرف المحيط ومصرف اللبيني</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center text-2xl">
+                                <i class="fa-solid fa-water"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-500 font-semibold">أطوال المصارف المطهرة</p>
+                                <h4 class="text-xl font-bold text-slate-800">142.5 كم</h4>
+                                <p class="text-xs text-blue-600 mt-0.5">من إجمالي 168 كم مستهدف</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-cyan-100 text-cyan-700 flex items-center justify-center text-2xl">
+                                <i class="fa-solid fa-pipe-valve"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-500 font-semibold">غسيل شبكات الصرف المغطى</p>
+                                <h4 class="text-xl font-bold text-slate-800">38 مجمع</h4>
+                                <p class="text-xs text-cyan-600 mt-0.5">هندسة أوسيم والوراق</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="networks-table-container" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <!-- سيتم حقن جدول الشبكات هنا -->
+                    </div>
+                </section>
+
+                <!-- 3. قسم الصيانة الميكانيكية والمحطات (Mechanical View) -->
+                <section id="view-mechanical" class="hidden space-y-6">
+                    <div class="bg-gradient-to-l from-amber-700 to-orange-600 rounded-2xl p-6 text-white shadow-md flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h3 class="text-2xl font-bold">إدارة الصيانة الميكانيكية ومحطات الرفع</h3>
+                            <p class="text-amber-100 text-sm mt-1">مراقبة ساعات التشغيل، العمرات الجسيمة للطلمبات، ومخزون الزيوت والوقود</p>
+                        </div>
+                        <button onclick="openAddModal('mechanical')" class="bg-white text-amber-800 hover:bg-amber-50 px-4 py-2.5 rounded-xl font-bold text-sm shadow transition-colors">
+                            <i class="fa-solid fa-plus ml-1"></i> تسجيل صيانة / عطل
+                        </button>
+                    </div>
+
+                    <!-- حالة المحطات الرئيسية -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-4 rounded-2xl border-r-4 border-emerald-500 shadow-sm">
+                            <div class="flex justify-between items-center">
+                                <h4 class="font-bold text-slate-800">محطة رفع الوراق</h4>
+                                <span class="px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-700 font-bold">تعمل</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">الوحدات العاملة: 4 / 4</p>
+                            <p class="text-xs text-slate-500">منسوب المص: 14.20 م</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border-r-4 border-emerald-500 shadow-sm">
+                            <div class="flex justify-between items-center">
+                                <h4 class="font-bold text-slate-800">محطة رفع البراجيل</h4>
+                                <span class="px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-700 font-bold">تعمل</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">الوحدات العاملة: 3 / 3</p>
+                            <p class="text-xs text-slate-500">منسوب المص: 13.85 م</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border-r-4 border-amber-500 shadow-sm">
+                            <div class="flex justify-between items-center">
+                                <h4 class="font-bold text-slate-800">محطة رفع أوسيم</h4>
+                                <span class="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-700 font-bold">صيانة وقائية</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">الوحدات العاملة: 3 / 4</p>
+                            <p class="text-xs text-slate-500">عمرة وحدة رقم (2)</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border-r-4 border-emerald-500 shadow-sm">
+                            <div class="flex justify-between items-center">
+                                <h4 class="font-bold text-slate-800">محطة رفع ناهيا</h4>
+                                <span class="px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-700 font-bold">تعمل</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">الوحدات العاملة: 3 / 3</p>
+                            <p class="text-xs text-slate-500">منسوب المص: 14.05 م</p>
+                        </div>
+                    </div>
+
+                    <div id="mechanical-table-container" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <!-- سيتم حقن جدول الميكانيكا هنا -->
+                    </div>
+                </section>
+
+                <!-- 4. قسم الشئون المالية والإدارية (Financial View) -->
+                <section id="view-financial" class="hidden space-y-6">
+                    <div class="bg-gradient-to-l from-purple-800 to-indigo-700 rounded-2xl p-6 text-white shadow-md flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h3 class="text-2xl font-bold">إدارة الشئون المالية والإدارية</h3>
+                            <p class="text-purple-100 text-sm mt-1">متابعة المستخلصات الجارية والختامية، الارتباطات المالية، وشئون العاملين</p>
+                        </div>
+                        <button onclick="openAddModal('financial')" class="bg-white text-purple-800 hover:bg-purple-50 px-4 py-2.5 rounded-xl font-bold text-sm shadow transition-colors">
+                            <i class="fa-solid fa-plus ml-1"></i> إضافة مستخلص / بند مالي
+                        </button>
+                    </div>
+
+                    <div id="financial-table-container" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <!-- سيتم حقن جدول الشئون المالية هنا -->
+                    </div>
+                </section>
+
             </div>
-        </div>
-    </section>
+        </main>
+    </div>
 
-    <!-- Footer -->
-    <footer class="bg-slate-950 text-slate-400 py-8 border-t border-slate-900 text-center text-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p>&copy; 2026 م. محمود سليمان. جميع الحقوق محفوظة.</p>
-            <p class="text-xs text-slate-500">تم التصميم والتطوير خصيصاً للنشر على GitHub Pages</p>
-        </div>
-    </footer>
+    <!-- نافذة منبثقة (Modal) لإضافة أو تعديل بيان -->
+    <div id="task-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden animate-fade-in">
+            <div class="bg-primary text-white px-6 py-4 flex items-center justify-between">
+                <h3 id="modal-title" class="font-bold text-lg">إضافة بيان متابعة جديد</h3>
+                <button onclick="closeModal()" class="text-white/80 hover:text-white">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="task-form" onsubmit="saveTask(event)" class="p-6 space-y-4">
+                <input type="hidden" id="task-id">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">القسم المختص *</label>
+                        <select id="task-dept" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:outline-none">
+                            <option value="networks">إدارة الشبكات والتطهيرات</option>
+                            <option value="mechanical">الصيانة الميكانيكية والمحطات</option>
+                            <option value="financial">الشئون المالية والإدارية</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">الفترة / الربع السنوي *</label>
+                        <select id="task-period" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:outline-none">
+                            <option value="Q1">الربع الأول</option>
+                            <option value="Q2">الربع الثاني</option>
+                            <option value="Q3">الربع الثالث</option>
+                        </select>
+                    </div>
+                </div>
 
-    <!-- JavaScript for Mobile Menu and Form -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">اسم العملية / البيان *</label>
+                    <input type="text" id="task-title" required placeholder="مثال: تطهير مصرف المحيط بطول 5 كم" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">المنطقة / الهندسة *</label>
+                        <input type="text" id="task-region" required placeholder="مثال: هندسة صرف أوسيم" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">المهندس / الموظف المسئول *</label>
+                        <input type="text" id="task-engineer" required placeholder="م. أحمد محمود" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">نسبة التنفيذ (%) *</label>
+                        <input type="number" id="task-progress" min="0" max="100" required value="50" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">حالة الموقف *</label>
+                        <select id="task-status" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:outline-none">
+                            <option value="completed">مكتمل / تم التسليم</option>
+                            <option value="in-progress">جاري التنفيذ</option>
+                            <option value="delayed">متأخر / يحتاج تدخل</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-200 flex justify-end gap-3">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100">إلغاء</button>
+                    <button type="submit" class="px-6 py-2 rounded-xl text-sm font-bold bg-primary hover:bg-blue-800 text-white shadow">حفظ البيانات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- الكود البرمجي لإدارة البيانات والرسوم البيانية -->
     <script>
-        const menuBtn = document.getElementById('menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
+        // البيانات الافتراضية المستخلصة من هيكل ملف المتابعة للإدارة العامة لصرف شمال الجيزة
+        const defaultData = [
+            {
+                id: 1,
+                dept: 'networks',
+                period: 'Q1',
+                title: 'تطهير ونزع حشائش مصرف اللبيني الرئيسي (كيلو 0 إلى 12)',
+                region: 'هندسة صرف الهرم',
+                engineer: 'م. كريم عبد العزيز',
+                progress: 92,
+                status: 'in-progress'
+            },
+            {
+                id: 2,
+                dept: 'networks',
+                period: 'Q1',
+                title: 'إحلال وتجديد شبكة الصرف المغطى منطقة بشتيل',
+                region: 'هندسة صرف الوراق',
+                engineer: 'م. سارة إبراهيم',
+                progress: 100,
+                status: 'completed'
+            },
+            {
+                id: 3,
+                dept: 'mechanical',
+                period: 'Q2',
+                title: 'عمرة جسيمة لوحدة الطلمبات رقم (2) وتغيير رولمان البلي',
+                region: 'محطة رفع أوسيم',
+                engineer: 'م. طارق السيد',
+                progress: 65,
+                status: 'in-progress'
+            },
+            {
+                id: 4,
+                dept: 'mechanical',
+                period: 'Q1',
+                title: 'صيانة لوحات التوزيع الكهربائية ومولدات الطوارئ',
+                region: 'محطة رفع البراجيل',
+                engineer: 'م. محمود حسن',
+                progress: 100,
+                status: 'completed'
+            },
+            {
+                id: 5,
+                dept: 'financial',
+                period: 'Q2',
+                title: 'صرف المستخلص الجاري رقم (4) لعملية تطهير المصارف الخصوصية',
+                region: 'الإدارة المالية - الديوان',
+                engineer: 'أ. هدى الشاذلي',
+                progress: 85,
+                status: 'in-progress'
+            },
+            {
+                id: 6,
+                dept: 'networks',
+                period: 'Q2',
+                title: 'إزالة تعديات وردم مخالف على جسر مصرف المحيط',
+                region: 'هندسة صرف كرداسة',
+                engineer: 'م. أحمد فؤاد',
+                progress: 40,
+                status: 'delayed'
+            },
+            {
+                id: 7,
+                dept: 'financial',
+                period: 'Q3',
+                title: 'مراجعة واعتماد الموازنة التقديرية للباب السادس (الاستثمارات)',
+                region: 'التخطيط والمتابعة',
+                engineer: 'أ. وليد مصطفى',
+                progress: 100,
+                status: 'completed'
+            }
+        ];
 
-        menuBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
+        // تحميل البيانات من LocalStorage أو استخدام البيانات الافتراضية
+        let tasks = JSON.parse(localStorage.getItem('north_giza_drainage_tasks')) || defaultData;
+        let currentTab = 'dashboard';
+        let barChartInstance = null;
+        let doughnutChartInstance = null;
 
-        function handleFormSubmit(e) {
-            e.preventDefault();
-            // Custom message box instead of alert()
-            const div = document.createElement('div');
-            div.className = 'fixed bottom-5 left-5 bg-cyan-600 text-white px-6 py-3 rounded-xl shadow-2xl z-50 font-semibold transition-all';
-            div.innerHTML = '<i class="fa-solid fa-check-circle ml-2"></i> تم إرسال رسالتك بنجاح سيتم الرد قريباً!';
-            document.body.appendChild(div);
-            setTimeout(() => {
-                div.remove();
-            }, 4000);
-            e.target.reset();
+        // تهيئة التطبيق عند التحميل
+        window.onload = function() {
+            document.getElementById('print-date').innerText = 'تاريخ استخراج التقرير: ' + new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
+            // تفعيل قائمة الموبايل
+            document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+                const nav = document.getElementById('nav-links');
+                nav.classList.toggle('hidden');
+            });
+
+            renderAll();
+            initCharts();
+        };
+
+        // حفظ البيانات في المتصفح
+        function syncStorage() {
+            localStorage.setItem('north_giza_drainage_tasks', JSON.stringify(tasks));
+            const now = new Date();
+            document.getElementById('last-updated-time').innerText = `آخر تحديث: ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
         }
-    </script>
-</body>
-</html>
+
+        // التنقل بين التبويبات (الأقسام)
+        function switchTab(tabId) {
+            currentTab = tabId;
+            
+            // تحديث أزرار القائمة الجانبية
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.dataset.tab === tabId) {
+                    btn.classList.add('bg-white/15', 'text-white', 'shadow-sm');
+                    btn.classList.remove('text-blue-100');
+                } else {
+                    btn.classList.remove('bg-white/15', 'text-white', 'shadow-sm');
+                    btn.classList.add('text-blue-100');
+                }
+            });
+
+            // إخفاء جميع الأقسام وإظهار القسم المختار
+            ['dashboard', 'networks', 'mechanical', 'financial'].forEach(sec => {
+                document.getElementById(`view-${sec}`).classList.add('hidden');
+            });
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+
+            // تحديث العناوين
+            const titles = {
+                'dashboard': ['لوحة القيادة ومؤشرات الأداء', 'متابعة الموقف التنفيذي لأعمال الصرف المغطى والمكشوف بشمال الجيزة'],
+                'networks': ['إدارة الشبكات والتطهيرات', 'متابعة خطط تطهير المصارف وصيانة شبكات الصرف المغطى'],
+                'mechanical': ['الصيانة الميكانيكية والمحطات', 'متابعة كفاءة تشغيل محطات الرفع والوحدات الميكانيكية'],
+                'financial': ['الشئون المالية والإدارية', 'متابعة المستخلصات، الموازنة المعتمدة، والتقارير الإدارية']
+            };
+            document.getElementById('page-title').innerText = titles[tabId][0];
+            document.getElementById('page-subtitle').innerText = titles[tabId][1];
+
+            // إغلاق القائمة في الموبايل بعد الاختيار
+            if (window.innerWidth < 768) {
+                document.getElementById('nav-links').classList.add('hidden');
+            }
+
+            renderAll();
+        }
+
+        // ترجمة أسماء الأقسام والحالات
+        function getDeptBadge(dept) {
+            const map = {
+                'networks': '<span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800"><i class="fa-solid fa-water ml-1"></i>الشبكات</span>',
+                'mechanical': '<span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-800"><i class="fa-solid fa-gears ml-1"></i>الميكانيكا</span>',
+                'financial': '<span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-100 text-purple-800"><i class="fa-solid fa-coins ml-1"></i>المالية</span>'
+            };
+            return map[dept] || dept;
+        }
+
+        function getStatusBadge(status) {
+            const map = {
+                'completed': '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>مكتمل</span>',
+                'in-progress': '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>جاري التنفيذ</span>',
+                'delayed': '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200"><span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>متأخر</span>'
+            };
+            return map[status] || status;
+        }
+
+        // بناء صفوف الجداول
+        function generateRowsHTML(filteredList) {
+            if (filteredList.length === 0) {
+                return `<tr><td colspan="7" class="py-8 text-center text-slate-400">لا توجد بيانات مطابقة للبحث أو الفلتر الحالي</td></tr>`;
+            }
+
+            return filteredList.map(task => {
+                const progressColor = task.progress === 100 ? 'bg-emerald-500' : (task.status === 'delayed' ? 'bg-rose-500' : 'bg-primary');
+                return `
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="py-3.5 px-4 whitespace-nowrap">${getDeptBadge(task.dept)}</td>
+                        <td class="py-3.5 px-4 font-bold text-slate-800">${task.title}</td>
+                        <td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">${task.region}</td>
+                        <td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">${task.engineer}</td>
+                        <td class="py-3.5 px-4 whitespace-nowrap w-36">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-slate-700 w-9">${task.progress}%</span>
+                                <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                    <div class="${progressColor} h-full rounded-full transition-all duration-500" style="width: ${task.progress}%"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 whitespace-nowrap">${getStatusBadge(task.status)}</td>
+                        <td class="py-3.5 px-4 whitespace-nowrap text-center no-print">
+                            <button onclick="editTask(${task.id})" class="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors" title="تعديل">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="deleteTask(${task.id})" class="text-rose-600 hover:bg-rose-50 p-2 rounded-lg transition-colors" title="حذف">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // تحديث الجداول والمؤشرات
+        function renderAll() {
+            const period = document.getElementById('period-filter').value;
+            const searchQuery = (document.getElementById('global-search')?.value || '').toLowerCase();
+
+            // فلترة البيانات
+            const filtered = tasks.filter(t => {
+                const matchPeriod = period === 'all' || t.period === period;
+                const matchSearch = t.title.toLowerCase().includes(searchQuery) || 
+                                    t.region.toLowerCase().includes(searchQuery) || 
+                                    t.engineer.toLowerCase().includes(searchQuery);
+                return matchPeriod && matchSearch;
+            });
+
+            // تحديث الجدول الرئيسي في لوحة القيادة
+            document.getElementById('tasks-table-body').innerHTML = generateRowsHTML(filtered);
+
+            // تحديث الجداول الفرعية لكل قسم
+            ['networks', 'mechanical', 'financial'].forEach(dept => {
+                const deptTasks = filtered.filter(t => t.dept === dept);
+                const container = document.getElementById(`${dept}-table-container`);
+                if (container) {
+                    container.innerHTML = `
+                        <div class="p-4 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
+                            <h4 class="font-bold text-slate-700">قائمة الأعمال والعمليات المسجلة (${deptTasks.length})</h4>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-600 text-xs uppercase border-b border-slate-200">
+                                        <th class="py-3 px-4 font-bold">القسم</th>
+                                        <th class="py-3 px-4 font-bold">اسم العملية / البيان</th>
+                                        <th class="py-3 px-4 font-bold">المنطقة / الموقع</th>
+                                        <th class="py-3 px-4 font-bold">المسئول</th>
+                                        <th class="py-3 px-4 font-bold">نسبة التنفيذ</th>
+                                        <th class="py-3 px-4 font-bold">الحالة</th>
+                                        <th class="py-3 px-4 font-bold text-center no-print">إجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-sm">
+                                    ${generateRowsHTML(deptTasks)}
